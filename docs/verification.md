@@ -1,5 +1,9 @@
 # Verification record
 
+## Database access for new functions
+
+Migration `0023` removes PostgreSQL's default public execution grant for functions created by the migration owner. The disposable database test creates a fresh RPC, checks both browser roles' effective permissions, grants the backend access, calls the function as the backend and rolls back the fixture.
+
 ## Original baseline
 
 The original private application at the recorded pre-portfolio source commit passed 89 Node tests and its TypeScript check in an isolated clone. The initial public source package passed 94 tests, its mocked release checks, demo, typecheck, build, clean reinstall and disposable database checks. Those initial results preceded the Marcus dialogue-opening change. The private production corpus is excluded from this public package.

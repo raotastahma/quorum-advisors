@@ -1,3 +1,18 @@
+-- Exercise the migration owner's default permissions for a newly created RPC.
+begin;
+create function public.quorum_default_execute_probe() returns integer
+language sql as $$ select 1 $$;
+do $$
+begin
+  assert not has_function_privilege('anon', 'public.quorum_default_execute_probe()', 'execute');
+  assert not has_function_privilege('authenticated', 'public.quorum_default_execute_probe()', 'execute');
+end;
+$$;
+grant execute on function public.quorum_default_execute_probe() to service_role;
+set local role service_role;
+select public.quorum_default_execute_probe();
+rollback;
+
 do $$
 declare
   demo_vector text := ((array[1.0] || array_fill(0.0, array[1535]))::vector)::text;
