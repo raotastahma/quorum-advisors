@@ -29,7 +29,8 @@ Observed on 2026-11-25 with Node.js 25.9.0:
 | Exact missing-RPC compatibility | Missing opener RPC skipped only for PGRST202/42883 naming that function; unrelated upstream errors remain errors |
 | Failed Telegram delivery retry | Stored answer reused without regeneration, a second claim or another appended greeting |
 | Public npm audit | Previously 0; dependencies unchanged by this source-only change |
-| Final secret scans and clean clone | Pending final source snapshot verification |
+| Final Gitleaks source snapshot and complete candidate history | 0 findings |
+| Fresh isolated clone | Public-registry install with scripts disabled, 111 tests, 4 release checks, demo, typecheck and build passed; tracked tree remained clean |
 
 The initial package's local production HTTP smoke returned home/health 200, unsupported browser API 410 and unauthorized webhook 401. No application route changed in this patch. The Node `test:e2e` command is a mocked release-contract test, not a real Telegram-client test. The disposable database has no network or persistent volume and uses original synthetic fixtures, not production data.
 
@@ -43,3 +44,5 @@ DOCKER_CONTEXT=colima sh scripts/verify-db.sh
 ```
 
 The demo's deterministic vectors demonstrate orchestration and evidence selection, not model quality. No live Telegram delivery, model-provider generation, hosted Supabase mutation, launch enablement or production deployment was performed. See [migration order and failure semantics](marcus-dialogue-opening.md), including the at-most-once styling tradeoff for an ambiguous bare-command delivery failure.
+
+The fresh-clone check used source commit `28fc023`. The subsequent verification-record update changes documentation only. No user original, prior worktree or canonical repository index was modified by this isolated implementation.
