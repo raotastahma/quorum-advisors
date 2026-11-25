@@ -264,6 +264,7 @@ test("advisor command repository writes tolerate successful empty response bodie
     const url = new URL(request.url);
 
     calls.push(request);
+    if (url.pathname === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") return Response.json(false);
 
     if (url.pathname === "/rest/v1/chats" && request.method === "POST") {
       return Response.json([{ id: "single-empty-writes" }], { status: 201 });
@@ -295,7 +296,8 @@ test("advisor command repository writes tolerate successful empty response bodie
     [
       "POST /rest/v1/chats",
       "POST /rest/v1/chat_advisors",
-      "POST /rest/v1/telegram_chat_states"
+      "POST /rest/v1/telegram_chat_states",
+      "POST /rest/v1/rpc/quorum_claim_marcus_dialogue_opening"
     ]
   );
 });
@@ -583,6 +585,7 @@ test("/all with inline question repository writes tolerate empty bodies and send
     const url = new URL(request.url);
 
     calls.push(request);
+    if (url.pathname === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") return Response.json(false);
 
     if (url.pathname === "/rest/v1/chats" && request.method === "POST") {
       return Response.json([{ id: "multi-empty-writes" }], { status: 201 });
@@ -927,6 +930,7 @@ test("ordinary text resumes a repository-backed current multi-advisor chat", asy
     const url = new URL(request.url);
 
     calls.push(request);
+    if (url.pathname === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") return Response.json(false);
 
     if (url.pathname === "/rest/v1/telegram_chat_states") {
       return Response.json([{ current_chat_id: "current-multi" }]);
@@ -1248,6 +1252,7 @@ function unusedChatRepository() {
     async getAssistantTurn() {
       throw new Error("unexpected getAssistantTurn call");
     },
+    async claimDialogueOpening() { return false; },
     async updateAssistantTelegramMessageId(): Promise<void> {
       throw new Error("unexpected updateAssistantTelegramMessageId call");
     }
@@ -1372,3 +1377,120 @@ function multiTurnChatRepository(input: { turns: string[]; selections?: string[]
     }
   };
 }
+
+
+for (const locale of ["en", "ru"] as const) {
+  for (const bare of [false, true]) {
+    test(`Marcus opening is once per true dialogue in ${locale}, bare=${bare}, even with empty model history`, async () => {
+      let current = "";
+      let chatIndex = 0;
+      let turnIndex = 0;
+      const claims = new Map<string, string>();
+      const sent: string[] = [];
+      const dispatcher = new DefaultBotCommandDispatcher({
+        advisorDirectory: advisorDirectory({ byCommand: { marcus_aurelius: MARCUS, paul_graham: PAUL } }),
+        chatRepository: {
+          ...singleTurnChatRepository({}),
+          async createSingleAdvisorChat() { return { id: "opening-chat-" + (++chatIndex) }; },
+          async setCurrentChat(_config, input) { current = input.chatId; },
+          async getCurrentChat() { return { kind: "single_advisor" as const, id: current, advisorId: MARCUS.id, advisorDisplayName: MARCUS.displayName, locale }; },
+          async insertTelegramUserTurn(_config, input) { return { id: "user-" + (++turnIndex), turnId: "turn-" + turnIndex, role: "user" as const, body: input.body, locale, createdAt: "2026-11-25T00:00:00Z" }; },
+          async claimDialogueOpening(_config, input) {
+            if (input.advisorId !== MARCUS.id) return false;
+            if (!claims.has(input.chatId)) claims.set(input.chatId, input.turnId);
+            return claims.get(input.chatId) === input.turnId;
+          }
+        },
+        replyGenerator: {
+          async listMessages() { return []; }, // A trimmed or empty model window is not a new dialogue.
+          async generateReply() { return { replyText: "A practical step.", modelName: "offline", fragments: [] }; }
+        },
+        async telegramSender(_config, input) { sent.push(input.text); return { messageId: null }; }
+      });
+      const substantive = locale === "ru" ? "Как принять решение?" : "How should I decide?";
+      await dispatcher.dispatch(CONFIG, { userId: "user-1", message: telegramMessage({ text: "/marcus_aurelius" + (bare ? "" : " " + substantive), languageCode: locale, entities: [{ type: "bot_command", offset: 0, length: 16 }] }) });
+      await dispatcher.dispatch(CONFIG, { userId: "user-1", message: telegramMessage({ text: locale === "ru" ? "Пока" : "Hello, goodbye", messageId: 2, languageCode: locale }) });
+      const token = locale === "ru" ? "Сальве" : "Salve";
+      assert.ok(sent[0]?.startsWith("Marcus Aurelius: " + token + ". "));
+      assert.equal(sent[1], "Marcus Aurelius: A practical step.");
+      assert.ok(sent.every((text) => !text.includes("Vale")));
+      await dispatcher.dispatch(CONFIG, { userId: "user-1", message: telegramMessage({ text: "/marcus_aurelius " + substantive, messageId: 3, languageCode: locale, entities: [{ type: "bot_command", offset: 0, length: 16 }] }) });
+      assert.equal(sent[2], "Marcus Aurelius: " + token + ". A practical step.");
+      await dispatcher.dispatch(CONFIG, { userId: "user-1", message: telegramMessage({ text: "/paul_graham A substantive question", messageId: 4, entities: [{ type: "bot_command", offset: 0, length: 12 }] }) });
+      assert.equal(sent[3], "Paul Graham: A practical step.");
+    });
+  }
+}
+
+for (const [code, rpcName, tolerated] of [
+  ["PGRST202", "quorum_claim_marcus_dialogue_opening", true],
+  ["42883", "quorum_claim_marcus_dialogue_opening", true],
+  ["PGRST202", "another_function", false],
+  ["42501", "quorum_claim_marcus_dialogue_opening", false]
+] as const) {
+  test(`rolling upgrade skips only the precisely missing optional opening RPC: ${code}/${rpcName}`, async (t) => {
+    const sent: string[] = [];
+    t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      const route = new URL(request.url).pathname;
+      if (route === "/rest/v1/chats") return Response.json([{ id: "rolling-chat" }]);
+      if (route === "/rest/v1/chat_advisors" || route === "/rest/v1/telegram_chat_states") return new Response(null, { status: 201 });
+      if (route === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") {
+        const body = await request.json() as Record<string, unknown>;
+        assert.equal(body.p_chat_id, "rolling-chat");
+        assert.equal(body.p_advisor_id, MARCUS.id);
+        return Response.json({ code, message: `Could not find function public.${rpcName}` }, { status: 404 });
+      }
+      throw new Error(`Unexpected route ${route}`);
+    });
+    const dispatcher = new DefaultBotCommandDispatcher({
+      advisorDirectory: advisorDirectory({ byCommand: { marcus_aurelius: MARCUS } }),
+      replyGenerator: unusedReplyGenerator(),
+      async telegramSender(_config, input) { sent.push(input.text); return { messageId: null }; }
+    });
+    const action = dispatcher.dispatch(CONFIG, { userId: "user-1", message: telegramMessage({
+      text: "/marcus_aurelius", entities: [{ type: "bot_command", offset: 0, length: 16 }]
+    }) });
+    if (tolerated) {
+      await action;
+      assert.deepEqual(sent, ["Marcus Aurelius: What would you like to discuss or ask?"]);
+    } else {
+      await assert.rejects(action);
+      assert.deepEqual(sent, []);
+    }
+  });
+}
+
+test("opening survives delivery retry without regenerating or appending another greeting", async () => {
+  let stored: import("../../../lib/server/chats/types.ts").ChatMessageRecord | null = null;
+  let generations = 0;
+  let claims = 0;
+  const attempts: string[] = [];
+  const dispatcher = new DefaultBotCommandDispatcher({
+    advisorDirectory: advisorDirectory({}),
+    chatRepository: {
+      ...singleTurnChatRepository({}),
+      async getCurrentChat() { return { kind: "single_advisor" as const, id: "retry-chat", advisorId: MARCUS.id, advisorDisplayName: MARCUS.displayName, locale: "en" as const }; },
+      async getAssistantTurn() { return stored; },
+      async claimDialogueOpening() { claims += 1; return true; },
+      async insertAssistantTurn(_config, input) { stored = { id: "saved-opening", turnId: input.turnId, role: "assistant", body: input.body, locale: "en", createdAt: "2026-11-25T00:00:00Z" }; return stored; },
+      async updateAssistantTelegramMessageId(_config, input) { if (stored) stored.telegramMessageId = input.telegramMessageId; }
+    },
+    replyGenerator: {
+      async listMessages() { return []; },
+      async generateReply() { generations += 1; return { replyText: "A practical step.", modelName: "offline", fragments: [] }; }
+    },
+    async telegramSender(_config, input) {
+      attempts.push(input.text);
+      if (attempts.length === 1) throw new Error("Offline delivery failure");
+      return { messageId: 200 };
+    }
+  });
+  const input = { userId: "user-1", message: telegramMessage({ text: "A substantive question", messageId: 70 }) };
+  await assert.rejects(dispatcher.dispatch(CONFIG, input), /Offline delivery failure/);
+  await dispatcher.dispatch(CONFIG, input);
+  await dispatcher.dispatch(CONFIG, input);
+  assert.equal(generations, 1);
+  assert.equal(claims, 1);
+  assert.deepEqual(attempts, ["Marcus Aurelius: Salve. A practical step.", "Marcus Aurelius: Salve. A practical step."]);
+});

@@ -7,9 +7,9 @@ import type {
   ChatRepository,
   RetrievedFragment
 } from "../chats/types.ts";
-import { applyToneDirectives } from "./tone.ts";
+import { applyToneDirectives, withoutLegacyGreetingRules } from "./tone.ts";
 
-export const CHAT_PROMPT_VERSION = "qrm-010-v1";
+export const CHAT_PROMPT_VERSION = "qrm-010-v2-dialogue-opening";
 
 export class RagService {
   private readonly model: ChatModelAdapter;
@@ -36,12 +36,13 @@ export class RagService {
       conversation: ChatMessageRecord[];
     }
   ): Promise<{ fragments: RetrievedFragment[]; modelName: string; replyText: string }> {
-    const dossier = await this.repository.getCurrentDossier(config, input.advisorId);
+    const storedDossier = await this.repository.getCurrentDossier(config, input.advisorId);
 
-    if (!dossier) {
+    if (!storedDossier) {
       throw new UpstreamUnavailableError("Current approved advisor dossier is missing.");
     }
 
+    const dossier = { ...storedDossier, tone: withoutLegacyGreetingRules(storedDossier.tone, storedDossier.advisorSlug) };
     const replyLanguage = detectReplyLanguage(input.userBody, input.chatLocale);
     const retrievalQuery =
       replyLanguage === "ru"
@@ -68,9 +69,7 @@ export class RagService {
       fragments
     });
     const replyText = applyToneDirectives({
-      userBody: input.userBody,
-      rawReply: generated.text,
-      tone: dossier.tone
+      userBody: input.userBody, rawReply: generated.text, tone: dossier.tone, advisorSlug: dossier.advisorSlug
     });
 
     if (replyText.length === 0) {

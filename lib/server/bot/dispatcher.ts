@@ -11,7 +11,8 @@ import {
 import type { ServerConfig } from "../config.ts";
 import { OpenAiChatModel } from "../model/openai.ts";
 import { CHAT_PROMPT_VERSION, detectReplyLanguage, RagService } from "../rag/service.ts";
-import { postgrest } from "../supabase.ts";
+import { withMarcusDialogueOpening } from "../rag/tone.ts";
+import { postgrest, UpstreamUnavailableError } from "../supabase.ts";
 import {
   buildBoldPrefixEntity,
   sendTelegramMessage,
@@ -61,6 +62,10 @@ interface CurrentMultiAdvisorChat {
 type CurrentBotChat = CurrentSingleAdvisorChat | CurrentMultiAdvisorChat;
 
 interface BotChatRepository {
+  claimDialogueOpening(
+    config: ServerConfig,
+    input: { chatId: string; turnId: string; advisorId: string }
+  ): Promise<boolean>;
   createSingleAdvisorChat(
     config: ServerConfig,
     input: {
@@ -258,7 +263,13 @@ export class DefaultBotCommandDispatcher implements BotCommandDispatcher {
     });
 
     if (inlineQuestion.length === 0) {
-      const greetingText = `${advisor.displayName}: What would you like to discuss or ask?`;
+      const isOpening = await this.chatRepository.claimDialogueOpening(config, {
+        chatId: chat.id, turnId: crypto.randomUUID(), advisorId: advisor.id
+      });
+      const prompt = `${advisor.displayName}: What would you like to discuss or ask?`;
+      const openingPrompt = isOpening && locale === "ru"
+        ? `${advisor.displayName}: Что вы хотите обсудить или о чём спросить?` : prompt;
+      const greetingText = isOpening ? withMarcusDialogueOpening(openingPrompt, locale, advisor.displayName) : prompt;
 
       await this.telegramSender(config, {
         chatId: input.message.chat.id,
@@ -495,9 +506,13 @@ export class DefaultBotCommandDispatcher implements BotCommandDispatcher {
       chatLocale: input.chatLocale,
       conversation: input.conversation
     });
-    const replyText = truncateTelegramAdvisorReply(
-      ensureAdvisorPrefix(sanitizePublicAdvisorReply(generated.replyText), input.advisorDisplayName)
-    );
+    const isOpening = await this.chatRepository.claimDialogueOpening(config, {
+      chatId: input.chatId, turnId: input.turnId, advisorId: input.advisorId
+    });
+    const publicReply = ensureAdvisorPrefix(sanitizePublicAdvisorReply(generated.replyText), input.advisorDisplayName);
+    const replyText = truncateTelegramAdvisorReply(isOpening
+      ? withMarcusDialogueOpening(publicReply, input.userLocale, input.advisorDisplayName)
+      : publicReply);
 
     return this.chatRepository.insertAssistantTurn(config, {
       chatId: input.chatId,
@@ -1107,6 +1122,29 @@ class SupabaseBotChatRepository implements BotChatRepository {
     await this.touchChat(config, input.chatId);
 
     return mapMessage(row);
+  }
+
+  async claimDialogueOpening(
+    config: ServerConfig,
+    input: { chatId: string; turnId: string; advisorId: string }
+  ): Promise<boolean> {
+    try {
+      const claimed = await postgrest<unknown>(config, {
+        method: "POST", path: "rpc/quorum_claim_marcus_dialogue_opening",
+        body: { p_chat_id: input.chatId, p_turn_id: input.turnId, p_advisor_id: input.advisorId }
+      });
+      if (typeof claimed !== "boolean") throw new UpstreamUnavailableError("Dialogue opening claim returned an invalid response.");
+      return claimed;
+    } catch (error) {
+      // During rolling deployment, skip only this optional opening if its exact RPC is absent.
+      if (error instanceof UpstreamUnavailableError) {
+        let details: { code?: string; message?: string } | null = null;
+        try { details = JSON.parse(error.message); } catch { /* Preserve the original upstream error. */ }
+        if (details && ["PGRST202", "42883"].includes(details.code ?? "") &&
+          typeof details.message === "string" && details.message.includes("quorum_claim_marcus_dialogue_opening")) return false;
+      }
+      throw error;
+    }
   }
 
   async getAssistantTurn(

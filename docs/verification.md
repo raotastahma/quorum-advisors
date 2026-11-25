@@ -1,17 +1,16 @@
 # Verification record
 
-## Baseline
+## Original baseline
 
-The original local application was inspected without modification. Its normal Node test command passed 89 tests. A non-incremental TypeScript check passed. The original production corpus was not included in this source package.
+The original private application at the recorded pre-portfolio source commit passed 89 Node tests and its TypeScript check in an isolated clone. The initial public source package passed 94 tests, its mocked release checks, demo, typecheck, build, clean reinstall and disposable database checks. Those initial results preceded the Marcus dialogue-opening change. The private production corpus is excluded from this public package.
 
-## Package changes
+## Final Marcus dialogue-opening change
 
-- Preserved every application route and server-library module.
-- Retained the original TypeScript suite. Two assertions tied to historical production advisor workspaces were adapted to an original fictional workspace; no tests were disabled.
-- Added five retrieval/tone tests and a network guard for unmocked fetch calls.
-- Replaced the historical corpus seed migration with a documented empty migration. Kept schema history and application functions, then added explicit backend-only API privileges.
-- Added an original local SQL seed and a disposable database verification script.
-- Omitted production operational scripts, private corpora, generated source seeds and historical source-specific database acceptance checks. They require data deliberately absent from this public package.
+Marcus's greeting is tied to a persisted dialogue-opening claim, independent of hello/bye keywords. `Salve` is used for English and `Сальве` for Russian; the Marcus policy never appends `Vale`. A bare Marcus command consumes the opening before its question prompt so the following answer does not repeat it. Other advisors retain their existing curator tone behavior, including the fictional Demo Mentor's Welcome rule.
+
+The new database migration is limited to the persisted opening marker and backend-only RPC. There is no global dossier-write ban, no new persona gate and no rewrite of stored dossier history. The repository carries the stored advisor slug into the dossier record; model context removes only the known retired Marcus instruction entries. Other tone guidance, other personas' rules, user words and natural model output remain intact.
+
+Application routes remain unchanged. Six server-library files were intentionally changed for lifecycle handling, legacy Marcus context and formatting. Current Marcus workspace/seed inputs and benchmark tooling were corrected in the isolated private lane; they are not corpus artifacts bundled in this public package. Historical generated evidence was preserved and documented as superseded rather than regenerated.
 
 ## Reproducible checks
 
@@ -19,20 +18,20 @@ Observed on 2026-11-25 with Node.js 25.9.0:
 
 | Check | Result |
 |---|---|
-| Normal application tests | 94 passed, none skipped |
-| TypeScript | Passed |
+| Final public application tests | 111 passed, none skipped |
+| Final isolated private application tests | 106 passed, none skipped |
+| Private offline Python benchmark regressions | 8 passed; no model or database calls |
+| TypeScript | Both lanes passed |
 | Mocked release-contract E2E | 4 passed |
-| Offline retrieval and tone | Learning and rest questions select different original evidence |
-| Next.js production build | Passed |
-| Local production HTTP smoke | Home/health 200; unsupported browser API 410; unauthorized webhook 401 |
-| Disposable database | All migrations and original seed applied; selection, retrieval, backend chat finalization/groundings and privilege assertions passed |
-| Public npm audit | 0 reported vulnerabilities after dependency remediation |
-| Secret scans | Gitleaks 8.30.1 returned 0 findings for the dependency-free source snapshot and newly committed Git history |
-| Clean clone | Public-registry install with install scripts disabled, 94 tests, 4 mocked release checks, offline demo, typecheck and build passed; tracked files remained unchanged |
+| Original offline retrieval/tone demo | Preserved Demo Mentor Welcome behavior and advisor-scoped retrieval |
+| Next.js production build | Both lanes passed |
+| Disposable database | All migrations/seed and retrieval/chat/privilege checks passed; opening claims covered same-turn retries, bare command then answer, new chats, advisor isolation and resumed history beyond 1,000 turns |
+| Exact missing-RPC compatibility | Missing opener RPC skipped only for PGRST202/42883 naming that function; unrelated upstream errors remain errors |
+| Failed Telegram delivery retry | Stored answer reused without regeneration, a second claim or another appended greeting |
+| Public npm audit | Previously 0; dependencies unchanged by this source-only change |
+| Final secret scans and clean clone | Pending final source snapshot verification |
 
-The source lock initially produced six affected-package findings. The candidate was updated to compatible Next.js 16.4.6 and patched transitive versions, then the normal checks were rerun. No exploit reproduction was performed. An audit result is time-bound and does not prove the absence of unknown vulnerabilities.
-
-All 10 application files and 20 server-library files were compared with the source baseline and retained byte for byte. The original working tree remained clean. The clean-clone install initially lacked one type package in the local cache; installing the locked packages from the public npm registry resolved that environment limitation.
+The initial package's local production HTTP smoke returned home/health 200, unsupported browser API 410 and unauthorized webhook 401. No application route changed in this patch. The Node `test:e2e` command is a mocked release-contract test, not a real Telegram-client test. The disposable database has no network or persistent volume and uses original synthetic fixtures, not production data.
 
 ```sh
 npm test
@@ -40,9 +39,7 @@ npm run typecheck
 npm run test:e2e
 npm run demo
 npm run build
-sh scripts/verify-db.sh
+DOCKER_CONTEXT=colima sh scripts/verify-db.sh
 ```
 
-The Node `test:e2e` script is a mocked application-release contract test. It does not operate a real Telegram client. The database script uses original local data with actual pgvector retrieval; it has no network or persistent storage.
-
-The demo validates orchestration, evidence selection, tone, advisor isolation and failure when relevant evidence is missing. Its deterministic vectors are not a model benchmark. Live Telegram delivery, OpenAI quality, hosted Supabase integration and production readiness require separate verification.
+The demo's deterministic vectors demonstrate orchestration and evidence selection, not model quality. No live Telegram delivery, model-provider generation, hosted Supabase mutation, launch enablement or production deployment was performed. See [migration order and failure semantics](marcus-dialogue-opening.md), including the at-most-once styling tradeoff for an ambiguous bare-command delivery failure.

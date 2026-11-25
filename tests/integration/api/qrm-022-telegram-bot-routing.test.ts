@@ -217,6 +217,7 @@ function mockFetch(calls: Request[], responses: Array<[number, unknown]>): void 
     const next = responses.shift();
 
     calls.push(request);
+    if (new URL(request.url).pathname === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") return Response.json(false);
 
     if (!next) {
       return Response.json({ error: "unexpected fetch", url: request.url }, { status: 500 });
@@ -242,6 +243,7 @@ function mockAllQuestionFetch(calls: Request[]): void {
     const url = new URL(request.url);
 
     calls.push(request);
+    if (new URL(request.url).pathname === "/rest/v1/rpc/quorum_claim_marcus_dialogue_opening") return Response.json(false);
 
     if (url.pathname === "/rest/v1/telegram_update_receipts" && request.method === "POST") {
       return Response.json([{ update_id: 22334455, status: "processing" }]);

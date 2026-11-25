@@ -397,6 +397,7 @@ function releaseChatRepository(input: { calls: string[] }) {
     async getAssistantTurn() {
       return null;
     },
+    async claimDialogueOpening() { return false; },
     async updateAssistantTelegramMessageId() {}
   };
 }
@@ -427,6 +428,7 @@ function unusedChatRepository() {
     async getAssistantTurn() {
       throw new Error("unexpected getAssistantTurn call");
     },
+    async claimDialogueOpening() { return false; },
     async updateAssistantTelegramMessageId(): Promise<void> {
       throw new Error("unexpected updateAssistantTelegramMessageId call");
     }

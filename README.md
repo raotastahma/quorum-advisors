@@ -71,3 +71,7 @@ Copy `.env.example` to `.env.local` and configure your own Telegram, Supabase an
 A real advisor needs redistribution-cleared source material, a validated workspace, actual embeddings and evaluation before launch. Registering a Telegram webhook or deploying a service is an external action; neither is performed by the demo or tests. Live service integration and production readiness are not claimed by this package.
 
 See [verification](docs/verification.md), [security boundaries](SECURITY.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+
+## Marcus dialogue opening
+
+For a database-configured Marcus advisor, the Telegram bot opens a true new dialogue with `Salve` in English or `Сальве` in Russian. The opening is persisted per chat, independent of hello/bye keywords. The following answer does not duplicate a bare-command opening, and the Marcus policy never appends `Vale`. Other advisors retain their existing tone behavior. See [migration order, retry behavior and limitations](docs/marcus-dialogue-opening.md).

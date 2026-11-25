@@ -56,6 +56,7 @@ export type ToneInstructions = {
 };
 
 export type AdvisorDossierRecord = {
+  advisorSlug?: string;
   id: string;
   version: number;
   tone: ToneInstructions;

@@ -1,0 +1,17 @@
+# Marcus dialogue opening
+
+The application adds `Salve.` at the opening of a genuinely new Marcus dialogue in English, or `Сальве.` in Russian. The first user message may be substantive; it does not need to say hello. A bare Marcus command opens with the same localized greeting followed by the prompt asking what the user wants to discuss. Other advisors retain their existing behavior.
+
+The opening is a persisted chat-level claim. The backend RPC checks the stored advisor slug, locks the chat and inspects complete database history before assigning an opening turn. The claim survives process restarts and context truncation. A new conversation gets a new chat ID; resuming an old chat or changing the language does not reset its opening. The existing bare-command opening consumes the claim so the following answer does not repeat it.
+
+The Marcus policy never appends `Vale`. User text, source material and natural model wording are not globally censored. Leading Roman greeting punctuation/case is normalized only while rendering a confirmed opening; explanatory phrases such as “Salve means hello” remain intact. The old keyword-triggered prefix/sign-off instructions are removed from the current Marcus source dossiers and seed. Historical stored Marcus dossiers are normalized only in model context, using the advisor slug; other tone guidance and other personas' rules are preserved. No historical dossier row or generated benchmark evidence is rewritten by the migration.
+
+The private primary source’s Marcus benchmark (not included in this corpus-free public package) no longer requires or scores Salve/Vale markers. Its normal generation/review prompts retain the worldview, grounding, tone, identity and quote checks. When it persists a benchmark turn, it uses the same database opening claim and localizes only a confirmed opening. Existing generated benchmark artifacts predate this change and do not establish quality for the changed prompt. No benchmark generation, launch-enabler command or external model call was run for this change.
+
+## Rollout and failure behavior
+
+Apply `supabase/migrations/0022_marcus_dialogue_opening.sql` before deploying the new application. It atomically adds the persisted opening marker and backend-only RPC. No live migration or deployment is performed by this change. If an app deploy precedes that migration, the app skips this optional greeting only when the precise RPC is missing (`PGRST202` or `42883` identifying its name). It does not infer a new dialogue from a trimmed history. Other upstream failures remain errors.
+
+For substantive answers, generation happens before the claim. The formatted answer is then persisted before sending it to Telegram. Retrying the same opening turn keeps the claim and resends the stored answer without regenerating it or appending a second greeting. A bare command claims its opening before sending its one-off UI prompt. If that delivery has an ambiguous network failure, the opening remains consumed; it is not reinserted into a later answer. Reissuing an advisor command creates a fresh dialogue, as before. This gives at-most-once dialogue styling, not an exactly-once Telegram delivery guarantee.
+
+The isolated checks cover normal greetings/farewells, substantive starts, RU/EN, duplicate greeting punctuation/case, legacy model context, other advisors, bare commands, multiple turns, fresh conversations, delivery retries, the exact missing-RPC fallback, SQL history beyond 1,000 turns and RPC privileges. They do not validate a live Telegram or model provider.

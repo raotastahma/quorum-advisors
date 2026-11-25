@@ -66,6 +66,7 @@ type FinalizedTurnRow = {
 };
 
 type DossierRow = {
+  advisors?: { slug: string };
   id: string;
   version: number;
   payload: {
@@ -214,7 +215,7 @@ export class SupabaseChatRepository implements ChatRepository {
     const rows = await postgrest<DossierRow[]>(config, {
       path: "advisor_dossiers",
       query: {
-        select: "id,version,payload",
+        select: "id,version,payload,advisors!inner(slug)",
         advisor_id: `eq.${advisorId}`,
         artifact_state: "eq.approved",
         is_current: "eq.true",
@@ -232,6 +233,7 @@ export class SupabaseChatRepository implements ChatRepository {
     return {
       id: row.id,
       version: row.version,
+      advisorSlug: row.advisors?.slug,
       tone: {
         voice: tone.voice ?? "",
         cadence: tone.cadence ?? "",

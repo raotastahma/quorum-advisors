@@ -1,3 +1,4 @@
+import { withoutLegacyGreetingRules } from "../rag/tone.ts";
 import { UpstreamUnavailableError } from "../supabase.ts";
 import type {
   AdvisorDossierRecord,
@@ -74,14 +75,15 @@ export class OpenAiChatModel implements ChatModelAdapter {
     fragments: RetrievedFragment[];
   }): Promise<{ modelName: string; text: string }> {
     const config = openAiConfig();
+    const dossier = { ...input.dossier, tone: withoutLegacyGreetingRules(input.dossier.tone, input.dossier.advisorSlug) };
     const response = await createResponse(config, {
       instructions: buildAdvisorInstructions(
-        input.dossier,
+        dossier,
         input.replyLanguage,
         input.chatLocale,
         input.advisorDisplayName
       ),
-      input: buildAdvisorInput(input.userBody, input.conversation, input.dossier, input.fragments)
+      input: buildAdvisorInput(input.userBody, input.conversation, dossier, input.fragments)
     });
 
     return {
