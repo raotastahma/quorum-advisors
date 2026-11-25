@@ -27,8 +27,12 @@ Observed on 2026-11-25 with Node.js 25.9.0:
 | Local production HTTP smoke | Home/health 200; unsupported browser API 410; unauthorized webhook 401 |
 | Disposable database | All migrations and original seed applied; selection, retrieval, backend chat finalization/groundings and privilege assertions passed |
 | Public npm audit | 0 reported vulnerabilities after dependency remediation |
+| Secret scans | Gitleaks 8.30.1 returned 0 findings for the dependency-free source snapshot and newly committed Git history |
+| Clean clone | Public-registry install with install scripts disabled, 94 tests, 4 mocked release checks, offline demo, typecheck and build passed; tracked files remained unchanged |
 
 The source lock initially produced six affected-package findings. The candidate was updated to compatible Next.js 16.4.6 and patched transitive versions, then the normal checks were rerun. No exploit reproduction was performed. An audit result is time-bound and does not prove the absence of unknown vulnerabilities.
+
+All 10 application files and 20 server-library files were compared with the source baseline and retained byte for byte. The original working tree remained clean. The clean-clone install initially lacked one type package in the local cache; installing the locked packages from the public npm registry resolved that environment limitation.
 
 ```sh
 npm test
