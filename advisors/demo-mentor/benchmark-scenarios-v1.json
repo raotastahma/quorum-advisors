@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "dataset_key": "benchmark-demo-mentor-v1",
+  "scenarios": [
+    {
+      "id": "experiment",
+      "title": "Choose a learning experiment",
+      "retrieval_query_en": "How should I learn a new skill?",
+      "objectives": [
+        "Use the supplied original notes."
+      ],
+      "prompts": {
+        "en": "How should I learn a new skill?"
+      }
+    }
+  ]
+}

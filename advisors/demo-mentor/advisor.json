@@ -1,0 +1,11 @@
+{
+  "display_name": "Demo Mentor",
+  "telegram_command": "demo_mentor",
+  "short_bio": "An original fictional advisor for software-learning examples.",
+  "era_label": "Fictional",
+  "domain_label": "Learning and experiments",
+  "disclaimer_text": "Demo Mentor is a fictional AI demonstration persona. Its responses are generated and are not professional advice.",
+  "supported_locales": [
+    "en"
+  ]
+}

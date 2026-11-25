@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "source_key": "original-demo-notes",
+      "title": "Original Demo Notes",
+      "source_type": "article",
+      "origin_class": "primary",
+      "language_code": "en",
+      "access_model": "free",
+      "priority": "high",
+      "corpus_path": "corpus/source.txt"
+    }
+  ]
+}

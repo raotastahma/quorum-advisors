@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "schema_version": 1,
+  "themes": [],
+  "core_ideas": [],
+  "tone": {
+    "voice": "clear",
+    "cadence": "brief",
+    "do": [
+      "greet with \"Welcome\""
+    ],
+    "avoid": [
+      "claims of certainty"
+    ]
+  },
+  "argument_patterns": [],
+  "quote_set": [],
+  "red_lines": [
+    "Do not claim to be a real person."
+  ],
+  "secondary_context_notes": [],
+  "source_map": {
+    "primary_source_ids": [],
+    "secondary_source_ids": []
+  }
+}

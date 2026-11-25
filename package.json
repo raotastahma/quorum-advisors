@@ -1,0 +1,30 @@
+{
+  "name": "quorum-advisors",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "lint": "tsc --noEmit",
+    "build": "next build",
+    "start": "next start",
+    "test:e2e": "node --import ./tests/network-guard.ts --test 'tests/e2e/**/*.test.ts'",
+    "test": "node --import ./tests/network-guard.ts --test 'tests/**/*.test.ts'",
+    "typecheck": "tsc --noEmit --incremental false",
+    "demo": "node demo/run.ts"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=24.3.0"
+  },
+  "type": "module"
+}

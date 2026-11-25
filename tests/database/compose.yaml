@@ -1,0 +1,21 @@
+services:
+  db:
+    image: public.ecr.aws/supabase/postgres:17.6.1.132
+    pull_policy: never
+    environment:
+      POSTGRES_DB: quorum_demo
+      POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PGDATA: /var/lib/postgresql/data
+    command: [postgres, -D, /var/lib/postgresql/data]
+    network_mode: none
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ../..:/workspace:ro
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d quorum_demo]
+      interval: 2s
+      timeout: 2s
+      retries: 30

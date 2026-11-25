@@ -1,0 +1,2 @@
+-- Private historical corpus seed intentionally excluded from this source package.
+-- Publish only original or redistribution-cleared advisor workspaces.
