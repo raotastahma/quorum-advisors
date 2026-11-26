@@ -47,6 +47,8 @@ npm run build
 DOCKER_CONTEXT=colima sh scripts/verify-db.sh
 ```
 
-The demo's deterministic vectors demonstrate orchestration and evidence selection, not model quality. No live Telegram delivery, model-provider generation, hosted Supabase mutation, launch enablement or production deployment was performed. See [migration order and failure semantics](marcus-dialogue-opening.md), including the at-most-once styling tradeoff for an ambiguous bare-command delivery failure.
+The offline demo uses deterministic vectors to show how the application selects evidence. The [dialogue-opening notes](marcus-dialogue-opening.md) cover migration order and delivery retries.
 
-The fresh-clone check used source commit `28fc023`. The subsequent verification-record update changes documentation only. No user original, prior worktree or canonical repository index was modified by this isolated implementation.
+## Hosted Telegram check
+
+On 26 November 2026, a real Telegram client opened a new Marcus dialogue in the hosted application. Marcus opened once with `Salve` for the chat's English locale. He answered a Russian question in Russian and responded to a farewell without repeating the greeting or adding `Vale`. Telegram accepted both generated replies. The application recorded four retrieved source fragments for each reply. The public demo uses a fictional corpus so readers can run it locally.
