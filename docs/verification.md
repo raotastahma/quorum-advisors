@@ -1,5 +1,15 @@
 # Verification record
 
+## Product documentation refresh, 27 November 2026
+
+The hosted product and this public package are different source snapshots. The hosted application adds advisor notes, subscription settings, scheduled delivery and a generic advisor-release schema. Those additions are not copied into this public package.
+
+Read-only hosted checks on 27 November found 13 launch-eligible advisors and 13 distinct current tone payloads with nonempty voice and cadence guidance. The active production deployment was ready. The database had the latest delivery-time migration and one active scheduler running every five minutes. A scheduled delivery had a Telegram confirmation. These observations establish the inspected product state; they do not measure delivery to every subscriber or overall voice quality.
+
+Fresh local checks for this documentation refresh passed 111 public application tests, TypeScript, four mocked release checks, the offline demo and a production build. The built application returned home and health HTTP 200 and unsupported browser bootstrap HTTP 410 on localhost. The isolated private source passed 150 application tests, TypeScript and four mocked release checks. Local documentation links resolved and the patch passed whitespace checks. No live messages or scheduled jobs were triggered by these local checks. The dated results below retain their original scope.
+
+The documented disposable database check also passed all 23 public migrations, the original demo seed and the smoke script's 19 assertions. A separate local database applied all 33 private migrations and passed the committed transactional thought-subscription fixture. That fixture covers scheduling, rotation, retries, opt-out and custom delivery times. It rolled back completely; no scheduler job or HTTP request was created. Both test containers used Colima's default profile, no network or exposed ports, and temporary database storage, and both were removed afterward. These checks do not exercise actual scheduled delivery or provider calls.
+
 ## Database access for new functions
 
 Migration `0023` removes PostgreSQL's default public execution grant for functions created by the migration owner. The disposable database test creates a fresh RPC, checks both browser roles' effective permissions, grants the backend access, calls the function as the backend and rolls back the fixture.

@@ -2,6 +2,8 @@
 
 The offline demo uses in-memory adapters and original fixtures. The test runner denies unmocked network calls. No credentials, user conversations or production infrastructure configuration are included.
 
+This review boundary covers the public conversation snapshot. The newer private advisor-note commands, subscription data and cron delivery implementation are not included here. Product descriptions in the README do not extend this package's security or deployment verification to those components.
+
 In the live application, Telegram's webhook secret is checked before update processing. Server configuration fails when required values are missing. The OpenAI and Supabase keys stay in server-side adapters. Disabled browser routes do not grant access to bot conversations.
 
 Migration `0021_service_only_api.sql` explicitly removes table access and application-RPC execution from anonymous and browser-authenticated database roles. Existing narrowly granted backend service-role access is preserved. The disposable database check inspects these privileges and verifies backend retrieval.
