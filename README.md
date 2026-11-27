@@ -6,6 +6,8 @@
 
 If you could ask Marcus Aurelius one question, what would it be? Quorum lets you bring that question to an AI advisor inspired by his writings. Explore it with any of 13 advisors, compare their answers, or subscribe to a daily reflection in Telegram.
 
+I curated the writings and talks behind the 13 AI personas, designed prompts for each advisor’s reasoning style and tone, and used retrieval-augmented generation (RAG) to make their answers reflect those sources. I tested replies in English and Russian for accurate use of sources, consistency with the thinker’s ideas, and tone.
+
 ## Ask your first question
 
 1. [Open Quorum in Telegram](https://t.me/quorum_ai_bot) and press **Start** to see the advisor directory.
@@ -36,7 +38,7 @@ The advisor catalog includes the following perspectives.
 
 ## How the replies are grounded
 
-Quorum uses retrieval-augmented generation (RAG). It retrieves passages from each advisor’s approved sources using embeddings, then passes those passages, the question and the advisor’s style instructions to a shared model. The service uses a Next.js API, PostgreSQL with pgvector and OpenAI adapters. Selected English and Russian scenarios check source use and tone.
+Quorum uses OpenAI embeddings and PostgreSQL with pgvector to find relevant passages in the selected advisor’s source collection. The Next.js API sends those passages, the question and the advisor’s style instructions to a shared model through the OpenAI Responses API.
 
 The hosted Telegram service includes the full advisor catalog and scheduled delivery. This repository contains the conversation and retrieval code with an original sample corpus for local development.
 
