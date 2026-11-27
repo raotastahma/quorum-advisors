@@ -1,14 +1,20 @@
 # Quorum Advisors
 
-I built Quorum to learn retrieval-augmented generation (RAG). Users can ask one advisor a question or compare several perspectives in Telegram. I learned to select sources, retrieve relevant passages with embeddings, shape each advisor's voice and evaluate answers in English and Russian. The application combines a Telegram bot, a Next.js API, PostgreSQL with pgvector and OpenAI adapters.
+<img src="assets/quorum.jpg" alt="Quorum" width="132">
 
-This repository is a runnable snapshot of the conversation architecture with an original fictional advisor fixture. The hosted product has evolved beyond this snapshot. Historical source texts, third-party corpora, production seeds, private operational records and deployment credentials are excluded.
+Quorum is a Telegram service for exploring a question through the perspectives of 13 AI advisors. Each draws on a different body of work and has a distinct reasoning and writing style. You can talk to one advisor, compare several answers, or receive a short note on a schedule you choose.
+
+## Ask your first question
+
+1. [Open Quorum in Telegram](https://t.me/quorum_ai_bot) and press **Start** to see the advisor directory.
+2. Choose an advisor, or type `/all` followed by your question. For example, try `/all What should I test before committing to a new product idea?` Quorum selects up to five relevant advisors and gives each a separate reply.
+3. For a short reading, send `/thought`. Private chats start with daily notes at 09:00 UTC. Use `/thought_settings` to change the time, interval or language, or to turn delivery off.
 
 ## Product and advisor styles
 
-Quorum is for people seeking different perspectives on work, decisions, learning and personal questions. Users can choose an advisor or send `/all` to receive up to five separately generated replies selected for specialist fit. Each advisor receives its own conversation history and retrieved evidence. Advisors are AI interpretations of documented ideas, not the real people or their official representatives.
+Each advisor is an AI interpretation of documented ideas and writings. In a group conversation, each one receives its own conversation history and source passages.
 
-As of 27 November 2026, the [hosted Telegram bot](https://t.me/quorum_ai_bot) has 13 launch-enabled advisors. Their approved dossiers specify different reasoning and writing patterns:
+The advisor catalog includes the following perspectives.
 
 | Advisor | Curated perspective and style |
 |---|---|
@@ -26,15 +32,11 @@ As of 27 November 2026, the [hosted Telegram bot](https://t.me/quorum_ai_bot) ha
 | Sam Altman | Ambitious but uncertainty-aware choices about focus, compounding and AI economics |
 | Steve Jobs | Consequential choices explained through relevant details and demanding practical criteria |
 
-Each advisor uses a shared model. Curated source material, retrieved passages and instructions from the advisor's approved dossier shape the answer. I used selected English and Russian scenarios to check whether replies stayed grounded and followed the intended style.
+## How the replies are grounded
 
-## Advisor notes in Telegram
+Quorum uses retrieval-augmented generation (RAG). It retrieves passages from each advisor’s approved sources using embeddings, then passes those passages, the question and the advisor’s style instructions to a shared model. The service uses a Next.js API, PostgreSQL with pgvector and OpenAI adapters. Selected English and Russian scenarios check source use and tone.
 
-In Telegram, `/thought` requests a short note from a randomly selected advisor. Scheduled editions rotate among eligible advisors and draw on approved ideas and source passages.
-
-In a private chat, a processed interaction enrolls the reader in a daily note at 09:00 UTC. `/thought_settings` lets readers switch delivery off or on, choose a UTC time and an interval in days, and select English, Russian or their Telegram language. This language choice also applies to `/thought`. The scheduler checks for due notes every five minutes.
-
-On 27 November, the hosted scheduler was active and Telegram had acknowledged a scheduled delivery. The hosted application runs the subscriptions. The example below demonstrates retrieval and dialogue locally with a fictional advisor.
+The hosted Telegram service includes the full advisor catalog and scheduled delivery. This repository contains the conversation and retrieval code with an original sample corpus for local development.
 
 ## Run the offline example
 
