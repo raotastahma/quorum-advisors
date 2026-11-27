@@ -1,14 +1,16 @@
 # Quorum Advisors
 
-<img src="assets/quorum.jpg" alt="Quorum" width="132">
+<p align="center">
+  <img src="assets/quorum.jpg" alt="Quorum" width="132">
+</p>
 
-Quorum is a Telegram service for exploring a question through the perspectives of 13 AI advisors. Each draws on a different body of work and has a distinct reasoning and writing style. You can talk to one advisor, compare several answers, or receive a short note on a schedule you choose.
+If you could ask Marcus Aurelius one question, what would it be? Quorum lets you bring that question to an AI advisor inspired by his writings. Explore it with any of 13 advisors, compare their answers, or subscribe to a daily reflection in Telegram.
 
 ## Ask your first question
 
 1. [Open Quorum in Telegram](https://t.me/quorum_ai_bot) and press **Start** to see the advisor directory.
 2. Choose an advisor, or type `/all` followed by your question. For example, try `/all What should I test before committing to a new product idea?` Quorum selects up to five relevant advisors and gives each a separate reply.
-3. For a short reading, send `/thought`. Private chats start with daily notes at 09:00 UTC. Use `/thought_settings` to change the time, interval or language, or to turn delivery off.
+3. For a short reading, send `/thought`. Use `/thought_settings` to choose when and how often notes arrive, change their language, or turn them off.
 
 ## Product and advisor styles
 
